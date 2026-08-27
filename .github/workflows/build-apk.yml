@@ -26,25 +26,30 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install dependencies and build web
+      - name: Install dependencies & Build Web
         run: |
-          npm ci || npm install
-          npm install @capacitor/core @capacitor/cli @capacitor/android
+          npm install
           npm run build
 
-      - name: Sync Capacitor Android
+      - name: Initialize Capacitor Android Platform
         run: |
-          npx cap add android || true
+          rm -rf android
+          npx cap add android
           npx cap sync android
+
+      - name: Setup Android Permissions in Manifest
+        run: |
+          sed -i '/<application/i \    <uses-permission android:name="android.permission.INTERNET" />\n    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />\n    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />\n    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />\n    <uses-permission android:name="android.permission.VIBRATE" />' android/app/src/main/AndroidManifest.xml
 
       - name: Build Debug APK with Gradle
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace
+          ./gradlew assembleDebug --no-daemon
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: MediaFlow-Android-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
