@@ -32,13 +32,31 @@ jobs:
       - name: Add and Sync Android
         run: |
           npx cap add android || true
+          npx @capacitor/assets generate --android || true
           npx cap sync android
+
+      - name: Set Custom App Icons
+        run: |
+          # Copy high resolution app icon to all android mipmap density folders
+          for dir in android/app/src/main/res/mipmap-*; do
+            if [ -d "$dir" ]; then
+              cp public/icon.png "$dir/ic_launcher.png" || true
+              cp public/icon.png "$dir/ic_launcher_round.png" || true
+              cp public/icon.png "$dir/ic_launcher_foreground.png" || true
+            fi
+          done
+          # Copy splash
+          for dir in android/app/src/main/res/drawable*; do
+            if [ -d "$dir" ]; then
+              cp public/logo.png "$dir/splash.png" || true
+            fi
+          done
 
       - name: Build Debug APK
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew clean assembleDebug --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
