@@ -37,19 +37,15 @@ jobs:
 
       - name: Set Custom App Icons
         run: |
-          # Copy high resolution app icon to all android mipmap density folders
-          for dir in android/app/src/main/res/mipmap-*; do
-            if [ -d "$dir" ]; then
-              cp public/icon.png "$dir/ic_launcher.png" || true
-              cp public/icon.png "$dir/ic_launcher_round.png" || true
-              cp public/icon.png "$dir/ic_launcher_foreground.png" || true
-            fi
-          done
-          # Copy splash
-          for dir in android/app/src/main/res/drawable*; do
-            if [ -d "$dir" ]; then
-              cp public/logo.png "$dir/splash.png" || true
-            fi
+          # Copy icon to all standard density folders (avoiding anydpi xml duplicate collision)
+          for density in mdpi hdpi xhdpi xxhdpi xxxhdpi; do
+            mkdir -p "android/app/src/main/res/mipmap-$density"
+            cp public/icon.png "android/app/src/main/res/mipmap-$density/ic_launcher.png" || true
+            cp public/icon.png "android/app/src/main/res/mipmap-$density/ic_launcher_round.png" || true
+            cp public/icon.png "android/app/src/main/res/mipmap-$density/ic_launcher_foreground.png" || true
+            
+            mkdir -p "android/app/src/main/res/drawable-$density"
+            cp public/logo.png "android/app/src/main/res/drawable-$density/splash.png" || true
           done
 
       - name: Build Debug APK
