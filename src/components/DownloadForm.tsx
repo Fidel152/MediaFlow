@@ -83,6 +83,11 @@ export const DownloadForm: React.FC<DownloadFormProps> = ({
             placeholder="Coller un lien ici (ex: https://...)"
             value={inputUrl}
             onChange={(e) => setInputUrl(e.target.value)}
+            onFocus={(e) => {
+              setTimeout(() => {
+                e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }, 200);
+            }}
             disabled={isAnalyzing}
             required
             autoComplete="off"
